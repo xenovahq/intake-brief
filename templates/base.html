@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Intake Brief System{% endblock %}</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/neue-machina" rel="stylesheet" />
+
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────────────────── */
+    :root {
+      --navy:  #1B3C53;
+      --ember: #FF6233;
+      --white: #ffffff;
+      --bg:    #f5f5f5;
+      --amber: #F59E0B;
+      --green: #22C55E;
+      --red:   #EF4444;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    /* ── Reset / Base ────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Neue Machina', 'Montserrat', sans-serif;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Nav ─────────────────────────────────────────────────────────────── */
+    nav {
+      background: var(--navy);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: 'Neue Machina', 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--white);
+      letter-spacing: 0.01em;
+    }
+
+    .nav-brand span { color: var(--ember); }
+
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: rgba(255,255,255,0.1);
+      color: var(--white);
+    }
+
+    .nav-links .btn-nav {
+      background: var(--ember);
+      color: var(--white);
+      border-radius: 6px;
+      padding: 8px 20px;
+    }
+
+    .nav-links .btn-nav:hover {
+      background: #e5512a;
+      color: var(--white);
+    }
+
+    /* ── Page wrapper ────────────────────────────────────────────────────── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── Card ────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--ember);
+      color: var(--white);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--navy);
+      border: 2px solid var(--navy);
+    }
+
+    .btn-sm { padding: 6px 14px; font-size: 0.78rem; }
+
+    /* ── Badge ───────────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-green  { background: #DCFCE7; color: #15803D; }
+    .badge-amber  { background: #FEF3C7; color: #92400E; }
+    .badge-red    { background: #FEE2E2; color: #991B1B; }
+
+    /* ── Page header ─────────────────────────────────────────────────────── */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      color: var(--navy);
+    }
+
+    .page-header p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.92rem;
+    }
+
+    /* ── Utility ─────────────────────────────────────────────────────────── */
+    .text-muted  { color: var(--muted); }
+    .text-ember  { color: var(--ember); }
+    .text-navy   { color: var(--navy); }
+    .fw-700      { font-weight: 700; }
+    .mt-8        { margin-top: 8px; }
+    .mt-16       { margin-top: 16px; }
+    .mt-24       { margin-top: 24px; }
+    .gap-8       { gap: 8px; }
+    .flex        { display: flex; }
+    .items-center { align-items: center; }
+  </style>
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">Strat<span>Edge</span> Briefs</div>
+  <div class="nav-links">
+    <a href="/" class="{% if request.path == '/' %}active{% endif %}">Dashboard</a>
+    <a href="/intake" class="btn-nav {% if request.path == '/intake' %}active{% endif %}">+ New Intake</a>
+  </div>
+</nav>
+
+<div class="page">
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

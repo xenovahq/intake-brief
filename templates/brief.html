@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+{% block title %}{{ brief.company_name }} — Engagement Brief{% endblock %}
+
+{% block head %}
+<style>
+  /* ── Brief header ────────────────────────────────────────────────────── */
+  .brief-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .brief-title h1 {
+    font-size: 1.9rem;
+    color: var(--navy);
+  }
+
+  .brief-title .meta {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  /* ── Progress bar ────────────────────────────────────────────────────── */
+  .score-block {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 24px;
+    min-width: 220px;
+    text-align: center;
+  }
+
+  .score-block .score-num {
+    font-family: 'Neue Machina', 'Montserrat', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+  }
+
+  .score-block .score-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .progress-bar-wrap {
+    height: 10px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+
+  .progress-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* ── Sections ────────────────────────────────────────────────────────── */
+  .brief-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .brief-main { display: flex; flex-direction: column; gap: 20px; }
+  .brief-side  { display: flex; flex-direction: column; gap: 20px; }
+
+  .section-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+  }
+
+  .section-card h2 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ember);
+    margin-bottom: 16px;
+  }
+
+  /* ── Field rows ──────────────────────────────────────────────────────── */
+  .field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field-row:last-child { border-bottom: none; }
+
+  .field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+
+  .field-value {
+    font-size: 0.9rem;
+    color: #1a1a2e;
+    line-height: 1.5;
+  }
+
+  /* ── Amber highlight for missing / vague ─────────────────────────────── */
+  .field-amber {
+    background: #FEF3C7;
+    border-left: 3px solid var(--amber);
+    border-radius: 6px;
+    padding: 8px 12px !important;
+    margin: 2px 0;
+  }
+
+  .field-amber .field-value {
+    color: #92400E;
+  }
+
+  .vague-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #FEF3C7;
+    color: #92400E;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Missing fields list ─────────────────────────────────────────────── */
+  .field-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .chip-amber { background: #FEF3C7; color: #92400E; }
+  .chip-none  { font-size: 0.82rem; color: var(--muted); }
+
+  /* ── Next step card ──────────────────────────────────────────────────── */
+  .next-step-card {
+    border-left: 4px solid var(--navy);
+  }
+
+  /* ── AI card ─────────────────────────────────────────────────────────── */
+  .ai-card {
+    background: linear-gradient(135deg, #1B3C53 0%, #16324a 100%);
+    color: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(27, 60, 83, 0.25);
+    padding: 32px;
+    margin-top: 20px;
+  }
+
+  .ai-card-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .ai-badge {
+    background: var(--ember);
+    color: var(--white);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .ai-card-label h2 {
+    font-size: 1rem;
+    color: var(--white);
+    margin: 0;
+  }
+
+  .ai-content {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.88);
+    white-space: pre-wrap;
+  }
+
+  .ai-content strong {
+    color: var(--white);
+  }
+
+  .no-ai {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  /* ── Firm context block ──────────────────────────────────────────────── */
+  .firm-context {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    padding-top: 4px;
+  }
+
+  /* ── Back link ───────────────────────────────────────────────────────── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    transition: color 0.15s;
+  }
+
+  .back-link:hover { color: var(--navy); }
+
+  @media (max-width: 768px) {
+    .brief-grid { grid-template-columns: 1fr; }
+    .brief-header { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="back-link">← Back to Dashboard</a>
+
+<!-- Brief Header -->
+<div class="brief-header">
+  <div class="brief-title">
+    <h1>{{ brief.company_name or 'Unnamed Client' }}</h1>
+    <div class="meta">
+      <span>{{ brief.industry or 'Industry unknown' }}</span>
+      <span>·</span>
+      <span>{{ brief.created_at[:10] }}</span>
+      <span>·</span>
+      {% if brief.completeness_score >= 6 %}
+        <span class="badge badge-green">Complete</span>
+      {% else %}
+        <span class="badge badge-amber">Needs Follow-up</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Score block -->
+  <div class="score-block">
+    <span class="score-sub">Completeness</span>
+    <div class="score-num">{{ brief.completeness_score }}<span style="font-size:1.1rem;font-weight:500;color:var(--muted)">/{{ brief.total_fields }}</span></div>
+    <div class="progress-bar-wrap">
+      {% set bar_color = '#22C55E' if pct >= 80 else ('#F59E0B' if pct >= 50 else '#EF4444') %}
+      <div class="progress-bar-fill" style="width: {{ pct }}%; background: {{ bar_color }};"></div>
+    </div>
+    <div class="progress-label">{{ pct }}% complete</div>
+  </div>
+</div>
+
+<!-- Two-column layout -->
+<div class="brief-grid">
+
+  <!-- Main column -->
+  <div class="brief-main">
+
+    <!-- Client Overview -->
+    <div class="section-card">
+      <h2>Client Overview</h2>
+
+      <div class="field-row {% if 'company_name' in missing or 'company_name' in vague %}field-amber{% endif %}">
+        <span class="field-label">Company Name {% if 'company_name' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.company_name or 'Information not provided.' }}</span>
+      </div>
+
+      <div class="field-row {% if 'industry' in missing or 'industry' in vague %}field-amber{% endif %}">
+        <span class="field-label">Industry {% if 'industry' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.industry or 'Information not provided.' }}</span>
+      </div>
+
+      {% if brief.decision_maker_name %}
+      <div class="field-row">
+        <span class="field-label">Decision Maker</span>
+        <span class="field-value">{{ brief.decision_maker_name }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Project Summary -->
+    <div class="section-card">
+      <h2>Project Summary</h2>
+
+      <div class="field-row {% if 'project_description' in missing or 'project_description' in vague %}field-amber{% endif %}">
+        <span class="field-label">Description {% if 'project_description' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.project_description or 'Information not provided.' }}</span>
+      </div>
+
+      {% if brief.current_pain_point %}
+      <div class="field-row">
+        <span class="field-label">Current Pain Point</span>
+        <span class="field-value">{{ brief.current_pain_point }}</span>
+      </div>
+      {% endif %}
+
+      {% if brief.desired_outcome %}
+      <div class="field-row">
+        <span class="field-label">Desired Outcome</span>
+        <span class="field-value">{{ brief.desired_outcome }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Constraints -->
+    <div class="section-card">
+      <h2>Constraints &amp; Considerations</h2>
+
+      <div class="field-row {% if 'timeline' in missing or 'timeline' in vague %}field-amber{% endif %}">
+        <span class="field-label">Timeline {% if 'timeline' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.timeline or 'Information not provided.' }}</span>
+      </div>
+
+      <div class="field-row {% if 'budget' in missing or 'budget' in vague %}field-amber{% endif %}">
+        <span class="field-label">Budget {% if 'budget' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.budget or 'Information not provided.' }}</span>
+      </div>
+
+      <div class="field-row {% if 'existing_tools' in missing or 'existing_tools' in vague %}field-amber{% endif %}">
+        <span class="field-label">Existing Tools {% if 'existing_tools' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.existing_tools or 'Information not provided.' }}</span>
+      </div>
+
+      <div class="field-row {% if 'constraints' in missing or 'constraints' in vague %}field-amber{% endif %}">
+        <span class="field-label">Constraints {% if 'constraints' in vague %}<span class="vague-tag">Vague</span>{% endif %}</span>
+        <span class="field-value">{{ brief.constraints or 'Information not provided.' }}</span>
+      </div>
+    </div>
+
+  </div><!-- /brief-main -->
+
+  <!-- Side column -->
+  <div class="brief-side">
+
+    <!-- Next Step -->
+    <div class="section-card next-step-card">
+      <h2>Recommended Next Step</h2>
+      <p style="font-size:0.9rem; line-height:1.6; font-weight:600; color:var(--navy);">
+        {{ next_step }}
+      </p>
+    </div>
+
+    <!-- Missing fields -->
+    <div class="section-card">
+      <h2>Missing Fields</h2>
+      {% if missing %}
+        <div class="field-chips">
+          {% for f in missing %}
+            <span class="chip chip-amber">{{ f.replace('_', ' ') }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <span class="chip-none">None — all fields complete.</span>
+      {% endif %}
+    </div>
+
+    <!-- Vague fields -->
+    <div class="section-card">
+      <h2>Vague Fields</h2>
+      {% if vague %}
+        <div class="field-chips">
+          {% for f in vague %}
+            <span class="chip chip-amber">{{ f.replace('_', ' ') }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <span class="chip-none">None detected.</span>
+      {% endif %}
+    </div>
+
+  </div><!-- /brief-side -->
+
+</div><!-- /brief-grid -->
+
+<!-- AI Consultant Notes — full width -->
+<div class="ai-card">
+  <div class="ai-card-label">
+    <span class="ai-badge">AI</span>
+    <h2>AI Consultant Notes</h2>
+  </div>
+  {% if brief.ai_notes %}
+    <div class="ai-content">{{ brief.ai_notes }}</div>
+  {% else %}
+    <p class="no-ai">AI enrichment was unavailable or skipped for this brief. Ensure OPENAI_API_KEY is set and resubmit to generate notes.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

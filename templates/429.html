@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Too Many Requests — StratEdge Briefs{% endblock %}
+
+{% block content %}
+<div style="text-align:center; padding: 80px 0;">
+  <div style="font-family:'Neue Machina','Montserrat',sans-serif; font-size:4rem; font-weight:800; color:var(--ember); line-height:1;">429</div>
+  <h2 style="margin-top:16px; color:var(--navy);">Slow down a little</h2>
+  <p style="color:var(--muted); margin-top:8px; font-size:0.9rem; max-width:360px; margin-left:auto; margin-right:auto;">
+    This demo allows up to 5 intake submissions per hour per visitor. Come back shortly and try again.
+  </p>
+  <a href="/intake" class="btn btn-primary" style="margin-top:28px; display:inline-block;">Back to Intake Form</a>
+</div>
+{% endblock %}

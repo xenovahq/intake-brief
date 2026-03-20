@@ -1,0 +1,10 @@
+.claude/
+.env
+.env.local
+.env.production
+.env.staging
+.env.*
+__pycache__/
+*.pyc
+briefs.db
+output/

@@ -1,0 +1,2 @@
+company_name,industry,project_description,timeline,budget,existing_tools,constraints
+Acme Legal,Immigration Law,We want to automate client document intake and reduce manual review time.,ASAP,Not specified,Google Drive; Gmail,Must comply with regulatory requirements.

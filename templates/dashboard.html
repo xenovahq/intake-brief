@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — StratEdge Briefs{% endblock %}
+
+{% block head %}
+<style>
+  /* ── Stat cards ─────────────────────────────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 32px;
+    border-left: 4px solid var(--ember);
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: 'Neue Machina', 'Montserrat', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+  }
+
+  /* ── Table ──────────────────────────────────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #F8FAFC; }
+
+  tbody td {
+    padding: 14px 16px;
+    font-size: 0.875rem;
+    color: #1a1a2e;
+    vertical-align: middle;
+  }
+
+  .client-name {
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ── Mini progress bar ──────────────────────────────────────────────── */
+  .score-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 140px;
+  }
+
+  .score-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .score-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+
+  /* ── Empty state ─────────────────────────────────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 0;
+    color: var(--muted);
+  }
+
+  .empty-state h2 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    color: var(--navy);
+  }
+
+  .empty-state p { font-size: 0.9rem; margin-bottom: 24px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Briefs Dashboard</h1>
+  <p>All submitted client intake briefs — scored, enriched, and ready for review.</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Briefs</div>
+    <div class="stat-value">{{ total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Avg Completeness</div>
+    <div class="stat-value">{{ avg_score }}<span style="font-size:1rem;font-weight:500;color:var(--muted)">/7</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Briefs This Week</div>
+    <div class="stat-value">{{ briefs_this_week }}</div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card" style="padding: 0; overflow: hidden;">
+  {% if briefs %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Industry</th>
+          <th>Completeness</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in briefs %}
+        {% set pct = ((b.completeness_score / b.total_fields) * 100) | int %}
+        {% set bar_color = '#22C55E' if pct >= 80 else ('#F59E0B' if pct >= 50 else '#EF4444') %}
+        <tr>
+          <td class="client-name">{{ b.company_name or '—' }}</td>
+          <td class="text-muted">{{ b.industry or '—' }}</td>
+          <td>
+            <div class="score-cell">
+              <div class="score-bar-wrap">
+                <div class="score-bar-fill" style="width: {{ pct }}%; background: {{ bar_color }};"></div>
+              </div>
+              <span class="score-text">{{ b.completeness_score }}/{{ b.total_fields }}</span>
+            </div>
+          </td>
+          <td class="text-muted" style="font-size:0.8rem;">{{ b.created_at[:10] }}</td>
+          <td>
+            {% if b.completeness_score >= 6 %}
+              <span class="badge badge-green">Complete</span>
+            {% else %}
+              <span class="badge badge-amber">Needs Follow-up</span>
+            {% endif %}
+          </td>
+          <td style="display:flex; gap:8px; align-items:center;">
+            <a href="/brief/{{ b.id }}" class="btn btn-outline btn-sm">View Brief</a>
+            <a href="/brief/{{ b.id }}/edit" class="btn btn-sm" style="background:#EFF6FF; color:#1D4ED8; border:none;">Edit</a>
+            <form method="POST" action="/brief/{{ b.id }}/delete" onsubmit="return confirm('Delete this brief? This cannot be undone.')">
+              <button type="submit" class="btn btn-sm" style="background:#FEE2E2; color:#991B1B; border:none;">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h2>No briefs yet</h2>
+    <p>Submit your first client intake to get started.</p>
+    <a href="/intake" class="btn btn-primary">+ New Intake</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

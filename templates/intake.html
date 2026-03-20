@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}New Client Intake — StratEdge Briefs{% endblock %}
+
+{% block head %}
+<style>
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-full { grid-column: 1 / -1; }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  label .req { color: var(--ember); margin-left: 2px; }
+
+  input[type="text"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.875rem;
+    color: #1a1a2e;
+    background: var(--white);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--ember);
+    box-shadow: 0 0 0 3px rgba(255, 98, 51, 0.12);
+  }
+
+  textarea { resize: vertical; min-height: 96px; }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231B3C53' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .section-divider {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1.5px solid var(--border);
+    margin: 8px 0;
+  }
+
+  .section-label {
+    grid-column: 1 / -1;
+    font-family: 'Neue Machina', 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-top: 4px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1.5px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .btn-submit {
+    background: var(--ember);
+    color: var(--white);
+    padding: 13px 32px;
+    font-size: 0.9rem;
+  }
+
+  .hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>New Client Intake</h1>
+  <p>Complete this form to generate an AI-enriched engagement brief in under 2 minutes.</p>
+</div>
+
+<div class="card">
+  <form method="POST" action="/intake">
+
+    <div class="form-grid">
+
+      <!-- ── Client Information ── -->
+      <div class="section-label">Client Information</div>
+
+      <div class="form-group">
+        <label>Company Name <span class="req">*</span></label>
+        <input type="text" name="company_name" placeholder="e.g. Acme Legal" required />
+      </div>
+
+      <div class="form-group">
+        <label>Industry <span class="req">*</span></label>
+        <input type="text" name="industry" placeholder="e.g. Immigration Law" required />
+      </div>
+
+      <div class="form-group">
+        <label>Decision Maker Name</label>
+        <input type="text" name="decision_maker_name" placeholder="e.g. Sarah Chen, Managing Partner" />
+      </div>
+
+      <!-- ── Project Details ── -->
+      <hr class="section-divider" />
+      <div class="section-label">Project Details</div>
+
+      <div class="form-group form-full">
+        <label>Project Description <span class="req">*</span></label>
+        <textarea name="project_description" placeholder="Describe the overall project or initiative..." required></textarea>
+      </div>
+
+      <div class="form-group form-full">
+        <label>Current Pain Point</label>
+        <textarea name="current_pain_point" placeholder="What problem is the client experiencing today?"></textarea>
+      </div>
+
+      <div class="form-group form-full">
+        <label>Desired Outcome</label>
+        <textarea name="desired_outcome" placeholder="What does success look like for the client?"></textarea>
+      </div>
+
+      <!-- ── Scope & Constraints ── -->
+      <hr class="section-divider" />
+      <div class="section-label">Scope &amp; Constraints</div>
+
+      <div class="form-group">
+        <label>Budget Range <span class="req">*</span></label>
+        <select name="budget" required>
+          <option value="" disabled selected>Select a range</option>
+          <option value="Under $10K">Under $10K</option>
+          <option value="$10K – $50K">$10K – $50K</option>
+          <option value="$50K – $150K">$50K – $150K</option>
+          <option value="$150K – $500K">$150K – $500K</option>
+          <option value="$500K+">$500K+</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Timeline <span class="req">*</span></label>
+        <select name="timeline" required>
+          <option value="" disabled selected>Select a timeline</option>
+          <option value="1–3 months">1–3 months</option>
+          <option value="3–6 months">3–6 months</option>
+          <option value="6–12 months">6–12 months</option>
+          <option value="12+ months">12+ months</option>
+          <option value="ASAP">ASAP (to be confirmed)</option>
+        </select>
+      </div>
+
+      <div class="form-group form-full">
+        <label>Existing Tools / Tech Stack</label>
+        <input type="text" name="existing_tools" placeholder="e.g. Google Drive, Salesforce, Slack" />
+        <span class="hint">Separate multiple tools with semicolons</span>
+      </div>
+
+      <div class="form-group form-full">
+        <label>Constraints</label>
+        <textarea name="constraints" placeholder="Regulatory requirements, security restrictions, team capacity, etc."></textarea>
+      </div>
+
+    </div><!-- /form-grid -->
+
+    <div class="form-actions">
+      <a href="/" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-submit">Submit Intake →</button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
