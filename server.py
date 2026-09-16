@@ -24,9 +24,7 @@ limiter = Limiter(
 )
 
 
-# ---------------------------------------------------------------------------
-# Database helpers
-# ---------------------------------------------------------------------------
+# --- Database helpers ---
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -90,9 +88,7 @@ def purge_expired(conn):
 # Initialise DB at import time so gunicorn workers have the schema ready
 init_db()
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
+# --- Routes ---
 
 @app.route("/")
 def dashboard():
@@ -156,11 +152,11 @@ def submit_intake():
         "decision_maker_name": request.form.get("decision_maker_name", "").strip(),
     }
 
-    # --- Existing generate_brief logic — unchanged ---
     markdown_content, company_name = generate_markdown(intake_data)
     score, total, missing, vague = calculate_completeness(intake_data)
 
-    # --- AI enrichment layer ---
+    # Optional — get_ai_notes() returns "" without an ANTHROPIC_API_KEY, so this
+    # layer no-ops cleanly instead of blocking brief generation.
     ai_notes = get_ai_notes({**intake_data, **extra_data})
 
     if ai_notes:
@@ -204,17 +200,17 @@ def submit_intake():
     conn.commit()
     conn.close()
 
-    return redirect(url_for("view_brief", id=brief_id))
+    return redirect(url_for("view_brief", brief_id=brief_id))
 
 
-@app.route("/brief/<int:id>")
-def view_brief(id):
+@app.route("/brief/<int:brief_id>")
+def view_brief(brief_id):
     sid = get_session_id()
 
     conn = get_db()
     # WHERE session_id = ? ensures a visitor can only read their own briefs
     brief = conn.execute(
-        "SELECT * FROM briefs WHERE id = ? AND session_id = ?", (id, sid)
+        "SELECT * FROM briefs WHERE id = ? AND session_id = ?", (brief_id, sid)
     ).fetchone()
     conn.close()
 
@@ -238,12 +234,12 @@ def view_brief(id):
     )
 
 
-@app.route("/brief/<int:id>/edit", methods=["GET"])
-def edit_brief_form(id):
+@app.route("/brief/<int:brief_id>/edit", methods=["GET"])
+def edit_brief_form(brief_id):
     sid = get_session_id()
     conn = get_db()
     brief = conn.execute(
-        "SELECT * FROM briefs WHERE id = ? AND session_id = ?", (id, sid)
+        "SELECT * FROM briefs WHERE id = ? AND session_id = ?", (brief_id, sid)
     ).fetchone()
     conn.close()
     if not brief:
@@ -251,12 +247,12 @@ def edit_brief_form(id):
     return render_template("edit.html", brief=brief)
 
 
-@app.route("/brief/<int:id>/edit", methods=["POST"])
-def edit_brief_submit(id):
+@app.route("/brief/<int:brief_id>/edit", methods=["POST"])
+def edit_brief_submit(brief_id):
     sid = get_session_id()
     conn = get_db()
     existing = conn.execute(
-        "SELECT * FROM briefs WHERE id = ? AND session_id = ?", (id, sid)
+        "SELECT * FROM briefs WHERE id = ? AND session_id = ?", (brief_id, sid)
     ).fetchone()
     if not existing:
         conn.close()
@@ -309,39 +305,35 @@ def edit_brief_submit(id):
             total,
             ",".join(missing),
             ",".join(vague),
-            id,
+            brief_id,
             sid,
         ),
     )
     conn.commit()
     conn.close()
-    return redirect(url_for("view_brief", id=id))
+    return redirect(url_for("view_brief", brief_id=brief_id))
 
 
-@app.route("/brief/<int:id>/delete", methods=["POST"])
-def delete_brief(id):
+@app.route("/brief/<int:brief_id>/delete", methods=["POST"])
+def delete_brief(brief_id):
     sid = get_session_id()
     conn = get_db()
     conn.execute(
-        "DELETE FROM briefs WHERE id = ? AND session_id = ?", (id, sid)
+        "DELETE FROM briefs WHERE id = ? AND session_id = ?", (brief_id, sid)
     )
     conn.commit()
     conn.close()
     return redirect(url_for("dashboard"))
 
 
-# ---------------------------------------------------------------------------
-# Error handlers
-# ---------------------------------------------------------------------------
+# --- Error handlers ---
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return render_template("429.html"), 429
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
+# --- Entry point ---
 
 if __name__ == "__main__":
     app.permanent_session_lifetime = timedelta(days=7)

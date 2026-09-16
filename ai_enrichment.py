@@ -1,17 +1,17 @@
 import logging
 import os
-from openai import OpenAI
+from anthropic import Anthropic
 
 logger = logging.getLogger(__name__)
 
 
 def get_ai_notes(intake_data: dict) -> str:
-    """Call gpt-4o-mini to enrich intake data. Retries up to 3x; returns '' on failure."""
-    api_key = os.environ.get("OPENAI_API_KEY")
+    """Call Claude Haiku to enrich intake data. Retries up to 3x; returns '' on failure."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return ""
 
-    client = OpenAI(api_key=api_key)
+    client = Anthropic(api_key=api_key)
 
     data_lines = "\n".join(
         f"{k.replace('_', ' ').title()}: {v}"
@@ -30,16 +30,14 @@ def get_ai_notes(intake_data: dict) -> str:
 
     for attempt in range(3):
         try:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a senior consultant."},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=0.7,
-                max_tokens=700,
+            message = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=500,
+                system="You are a senior consultant.",
+                messages=[{"role": "user", "content": user_prompt}],
             )
-            return response.choices[0].message.content.strip()
+            notes = message.content[0].text
+            return notes.strip()
         except Exception as exc:
             logger.warning("AI enrichment attempt %d failed: %s", attempt + 1, exc)
             if attempt == 2:

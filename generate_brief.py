@@ -79,13 +79,8 @@ def generate_markdown(intake_data):
     existing_tools = safe_get(intake_data, "existing_tools")
     constraints = safe_get(intake_data, "constraints")
 
-    # NEW: Pull firm context
     firm_context = read_firm_context()
-
-    # NEW: Calculate completeness
     score, total, missing, vague = calculate_completeness(intake_data)
-
-    # NEW: Determine next step
     next_step = determine_next_step(missing, vague)
 
     markdown_content = f"""# Client Engagement Brief
